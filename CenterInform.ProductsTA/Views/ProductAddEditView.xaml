@@ -1,0 +1,166 @@
+﻿<UserControl x:Class="CenterInform.ProductsTA.Views.ProductAddEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        Background="#FAFAFA">
+
+    <UserControl.Resources>
+        <ControlTemplate x:Key="errorValidation">
+            <DockPanel LastChildFill="True">
+                <Border DockPanel.Dock="Right"
+                        Background="LightCoral"
+                        Width="20"
+                        Height="20"
+                        CornerRadius="7"
+                        Margin="5,0,0,0"
+                        ToolTip="{Binding ElementName=srcAdorned, 
+                               Path=AdornedElement.(Validation.Errors)[0].ErrorContent}">
+                    <TextBlock Text="!" 
+                               FontSize="15" 
+                               Foreground="DarkRed"
+                               FontWeight="ExtraBold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <AdornedElementPlaceholder Name="srcAdorned">
+                    <Border BorderBrush="DarkRed"
+                            BorderThickness="1.2"/>
+                </AdornedElementPlaceholder>
+            </DockPanel>
+        </ControlTemplate>
+
+        <Style TargetType="TextBox" 
+               x:Key="textBox0">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="Foreground" Value="IndianRed"/>
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Width" Value="170"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Validation.ErrorTemplate" 
+                    Value="{StaticResource errorValidation}" />
+        </Style>
+
+        <Style TargetType="TextBlock" 
+               x:Key="tb1">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" 
+                   FontSize="15" 
+                   Margin="20" 
+                   HorizontalAlignment="Center" 
+                   Name="productFieldsLabel"
+                   Text="{Binding WindowLabel, FallbackValue=#WindowLabel}"/>
+
+        <Grid Grid.Row="1" >
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40*"/>
+                <ColumnDefinition Width="60*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" 
+                       Grid.Column="0" 
+                       Style="{StaticResource tb1}"
+                       Text="Код продукции:"/>
+            <TextBlock Grid.Row="1" 
+                       Grid.Column="0" 
+                       Style="{StaticResource tb1}" 
+                       Text="Название продукции:"/>
+            <TextBlock Grid.Row="2" 
+                       Grid.Column="0" 
+                       Style="{StaticResource tb1}"
+                       Text="Описание продукции:"/>
+            <TextBlock Grid.Row="3" 
+                       Grid.Column="0" 
+                       Style="{StaticResource tb1}" 
+                       Text="Количество:"/>
+
+            <TextBox Grid.Row="0" 
+                     Grid.Column="1"
+                     Name="tbCode"
+                     Style="{StaticResource textBox0}"
+                     Text="{Binding FormProduct.Code, 
+                            Mode=TwoWay, 
+                            UpdateSourceTrigger=PropertyChanged,
+                            ValidatesOnDataErrors=True}"
+                     IsReadOnly="{Binding IsIdReadOnly}"/>
+            <TextBox Grid.Row="1" 
+                     Grid.Column="1" 
+                     Name="tbName"
+                     Style="{StaticResource textBox0}" 
+                     Text="{Binding FormProduct.Name, 
+                            Mode=TwoWay, 
+                            UpdateSourceTrigger=PropertyChanged,
+                            ValidatesOnDataErrors=True}"/>
+            <TextBox Grid.Row="2" 
+                     Grid.Column="1" 
+                     Name="tbDescription"
+                     Style="{StaticResource textBox0}" 
+                     Height="60"  
+                     Text="{Binding FormProduct.Description, 
+                            Mode=TwoWay, 
+                            UpdateSourceTrigger=PropertyChanged,
+                            ValidatesOnDataErrors=True}"/>
+            <TextBox Grid.Row="3" 
+                     Grid.Column="1" 
+                     Name="tbQuantity"
+                     Style="{StaticResource textBox0}" 
+                     Text="{Binding FormProduct.Quantity, 
+                            Mode=TwoWay, 
+                            UpdateSourceTrigger=PropertyChanged,
+                            ValidatesOnDataErrors=True,
+                            StringFormat=N4}" 
+                     HorizontalContentAlignment="Right"/>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Width="90"
+                    Height="25" 
+                    HorizontalAlignment="Right"
+                    Margin="20"
+                    Content="Отменить"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Width="90"
+                    Height="25"
+                    HorizontalAlignment="Left"
+                    Margin="20"
+                    Content="Подтвердить"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+    </Grid>
+</UserControl>

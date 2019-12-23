@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Products" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Products">    
+    <xs:complexType>
+      <xs:sequence minOccurs="1" maxOccurs="unbounded">
+        <xs:element name="Product">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Code" type="T_Code" minOccurs="1" maxOccurs="1" />
+              <xs:element name="Name" type="T_Name" minOccurs="1" maxOccurs="1" />
+              <xs:element name="Description" type="T_Description" minOccurs="0" maxOccurs="1" />
+              <xs:element name="Quantity" type="T_Quantity" minOccurs="1" maxOccurs="1" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:simpleType name="T_Code">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="10" />
+      <xs:pattern value="[0-9]+" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="T_Name">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="255" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="T_Description">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="2000" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="T_Quantity">
+    <xs:restriction base="xs:decimal">
+      <xs:fractionDigits value="4" />
+      <xs:minInclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
