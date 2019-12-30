@@ -133,12 +133,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Events\Events.cs" />
     <Compile Include="Helpers\XDocumentSerialization.cs" />
     <Compile Include="Helpers\XDocumentValidation.cs" />
     <Compile Include="Interfaces\IFileIOService.cs" />
     <Compile Include="Interfaces\IFileService.cs" />
     <Compile Include="Interfaces\IDialogWindowService.cs" />
-    <Compile Include="Interfaces\ITabService.cs" />
     <Compile Include="MainModule.cs" />
     <Compile Include="Migrations\201911190618083_InitialCreate.cs" />
     <Compile Include="Migrations\201911190618083_InitialCreate.designer.cs">
@@ -151,7 +151,6 @@
     <Compile Include="Services\FileDialogService.cs" />
     <Compile Include="Services\DialogWindowService.cs" />
     <Compile Include="Services\FileIOService.cs" />
-    <Compile Include="Services\TabService.cs" />
     <Compile Include="Services\XmlService.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\CustomMessageBoxViewModel.cs" />

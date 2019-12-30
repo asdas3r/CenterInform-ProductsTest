@@ -5,6 +5,7 @@ using Prism.Commands;
 using Prism.Regions;
 
 using CenterInform.ProductsTA.Interfaces;
+using CenterInform.ProductsTA.Core;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
@@ -12,7 +13,7 @@ namespace CenterInform.ProductsTA.ViewModels
     {
         public TabViewModel()
         {
-            CloseCommand = new DelegateCommand(CloseCommandExecute);
+            CloseCommand = new DelegateCommand<object>(CloseCommandExecute);
         }
 
         private string _title;
@@ -34,28 +35,18 @@ namespace CenterInform.ProductsTA.ViewModels
             }
         }
 
-        public DelegateCommand CloseCommand { get; }
+        public DelegateCommand<object> CloseCommand { get; }
 
-        void CloseCommandExecute()
+        void CloseCommandExecute(object tabItem)
         {
-            MessageBox.Show("Closing by Button");
-            CurrentTabService.RemoveTab(this, false);
+            CurrentRegionManager.Regions[RegionNames.TabRegion].Remove(tabItem);
         }
+
+        public IRegionManager CurrentRegionManager { get; protected set; }
 
         public bool CanClose { get; set; } = true;
 
-        public ITabService CurrentTabService { get; set; }
-
-        public object CurrentServiceObject { get; set; }
-
-        public object InitialServiceObject { get; }
-
-        public event EventHandler<TabCloseEventArgs> CloseAction;
-
-        public void OnCloseInvokeAction()
-        {
-            CloseAction?.Invoke(this, new TabCloseEventArgs(CurrentServiceObject));
-        }
+        public bool IsBeenNavigated { get; set; } = false;
 
         public virtual bool IsNavigationTarget(NavigationContext navigationContext)
         {
@@ -69,15 +60,5 @@ namespace CenterInform.ProductsTA.ViewModels
         public virtual void OnNavigatedFrom(NavigationContext navigationContext)
         {
         }
-    }
-
-    public class TabCloseEventArgs : EventArgs
-    {
-        public TabCloseEventArgs(object o)
-        {
-            TabObject = o;
-        }
-
-        public object TabObject { get; }
     }
 }

@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-C:\Users\svega\Documents\source\repos\CenterInform.ProductsTA\CenterInform.ProductsTA\obj\Debug\
+C:\Users\Admin\source\repos\CenterInform.ProductsTA\CenterInform.ProductsTA\obj\Debug\
 CenterInform.ProductsTA
 none
 false
 DEBUG;TRACE
-C:\Users\svega\Documents\source\repos\CenterInform.ProductsTA\CenterInform.ProductsTA\App.xaml
+C:\Users\Admin\source\repos\CenterInform.ProductsTA\CenterInform.ProductsTA\App.xaml
 71344981996
 
-431168381504
-140-1190930473
+39591014366
+1401286150851
 Views\CustomMessageBoxView.xaml;Views\DeleteDialogView.xaml;Views\DialogWindow.xaml;Views\MainWindow.xaml;Views\ProductAddEditView.xaml;Views\ProductView.xaml;Views\RecurrentEntryDialogView.xaml;
 
 False

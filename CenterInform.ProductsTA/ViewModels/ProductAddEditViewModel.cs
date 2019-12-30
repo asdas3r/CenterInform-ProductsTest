@@ -6,50 +6,24 @@ using Prism.Commands;
 using CenterInform.ProductsTA.Models;
 using CenterInform.ProductsTA.Services;
 using CenterInform.ProductsTA.Interfaces;
+using System;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
     public class ProductAddEditViewModel : TabViewModel
     {
         private Product formProduct;
-        private readonly ITabService _tabService;
         private readonly IDialogWindowService _dialogService;
 
-        public ProductAddEditViewModel(ITabService tabService, IDialogWindowService dialogService) 
+        public ProductAddEditViewModel(IRegionManager regionManager, IDialogWindowService dialogService) 
         {
-            _tabService = tabService;
-            CurrentTabService = _tabService;
+            CurrentRegionManager = regionManager;
             _dialogService = dialogService;
-            CancelCommand = new DelegateCommand(() => CurrentTabService.RemoveTab(this, false));
+            CancelCommand = CloseCommand;
             SaveCommand = new DelegateCommand(SaveCommandExecute, SaveCommandCanExecute);
         }
 
-        public override bool IsNavigationTarget(NavigationContext navigationContext)
-        {
-            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
-
-            if (formProduct == null)
-            {
-                return true;
-            }
-
-            if (recievedProduct == null)
-                return true;
-
-            if (recievedProduct.Code.Equals(formProduct.Code))
-                return false;
-
-            return true;
-        }
-
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
-
-            InitProductForm(recievedProduct);
-        }
-
-        public DelegateCommand CancelCommand { get; }
+        public DelegateCommand<object> CancelCommand { get; }
         public DelegateCommand SaveCommand { get; }
         public string WindowLabel { get; set; }
         public bool IsIdReadOnly { get; set; }
@@ -129,7 +103,8 @@ namespace CenterInform.ProductsTA.ViewModels
                     dbService.ModifyInDb((Product)CurrentServiceObject, FormProduct);
                 }
             }
-            CurrentTabService.RemoveTab("ProductAddEditView", true);
+
+
         }
 
         private bool SaveCommandCanExecute()
@@ -147,6 +122,31 @@ namespace CenterInform.ProductsTA.ViewModels
             }
 
             SaveCommand.RaiseCanExecuteChanged();
+        }
+
+        public override bool IsNavigationTarget(NavigationContext navigationContext)
+        {
+            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
+
+            if (formProduct == null)
+            {
+                return true;
+            }
+
+            if (recievedProduct == null)
+                return true;
+
+            if (recievedProduct.Code.Equals(formProduct.Code))
+                return false;
+
+            return true;
+        }
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
+
+            InitProductForm(recievedProduct);
         }
     }
 }

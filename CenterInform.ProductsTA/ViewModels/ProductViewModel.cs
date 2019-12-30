@@ -4,36 +4,41 @@ using System.Linq;
 using System.Windows;
 
 using Prism.Commands;
+using Prism.Regions;
+using Prism.Events;
 
 using CenterInform.ProductsTA.Interfaces;
 using CenterInform.ProductsTA.Models;
 using CenterInform.ProductsTA.Services;
-using Prism.Regions;
+using CenterInform.ProductsTA.Core;
+using CenterInform.ProductsTA.Events;
+using System;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
     public class ProductViewModel : TabViewModel
     {
-        private readonly ITabService _tabService;
         private readonly IDialogWindowService _dialogService;
         private readonly IFileIOService _fileIOService;
         private readonly IFileDialogService _fileDialog;
         private readonly IFileService _xmlService;
+        private readonly IEventAggregator _eventAggregator;
+
         private ObservableCollection<Product> _products = new ObservableCollection<Product>();
         public ReadOnlyObservableCollection<Product> ProductCollection { get; }
 
-        public ProductViewModel(ITabService tabService, IDialogWindowService dialogService, IFileIOService fileIOService, IFileDialogService fileDialog, IFileService fileService)
+        public ProductViewModel(IRegionManager regionManager, IDialogWindowService dialogService, IFileIOService fileIOService, IFileDialogService fileDialog, IFileService fileService, IEventAggregator eventAggregator)
         {
             Title = "Список товаров";
             ProductCollection = new ReadOnlyObservableCollection<Product>(_products);
             CanClose = false;
 
-            _tabService = tabService;
-            CurrentTabService = _tabService;
+            CurrentRegionManager = regionManager;
             _dialogService = dialogService;
             _fileIOService = fileIOService;
             _fileDialog = fileDialog;
             _xmlService = fileService;
+            _eventAggregator = eventAggregator;
 
             SelectPreviousProductCommand = new DelegateCommand(SelectPreviousProductCommandExecute);
             SelectNextProductCommand = new DelegateCommand(SelectNextProductCommandExecute);
@@ -42,15 +47,8 @@ namespace CenterInform.ProductsTA.ViewModels
             RemoveProductCommand = new DelegateCommand(RemoveProductCommandExecute, RemoveProductCommandCanExecute).ObservesProperty(() => ProductCollection.Count);
             ImportXmlCommand = new DelegateCommand(ImportXmlCommandExecute);
             ExportXmlCommand = new DelegateCommand(ExportXmlCommandExecute);
-        }
 
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            RefreshSource();
-            if (ProductCollection.Count > 0)
-            {
-                SelectedProduct = ProductCollection[0];
-            }
+            _eventAggregator.GetEvent<CloseTabEvent>().Subscribe(OnCloseTab);
         }
 
         public DelegateCommand SelectPreviousProductCommand { get; }
@@ -90,12 +88,15 @@ namespace CenterInform.ProductsTA.ViewModels
 
         private void CreateProductCommandExecute()
         {
-            CurrentTabService.AddTab("ProductAddEditView", null);
+            CurrentRegionManager.Regions[RegionNames.TabRegion].RequestNavigate("ProductAddEditView", new NavigationParameters());
         }
 
         private void EditProductCommandExecute()
         {
-            CurrentTabService.AddTab("ProductAddEditView", SelectedProduct);
+            NavigationParameters parameters = new NavigationParameters();
+            parameters.Add("selectedProduct", SelectedProduct);
+            CurrentRegionManager.Regions[RegionNames.TabRegion].RequestNavigate("ProductAddEditView", parameters);
+
             RemoveProductCommand.RaiseCanExecuteChanged();
         }
 
@@ -216,9 +217,23 @@ namespace CenterInform.ProductsTA.ViewModels
             }
         }
 
-        private void OnTabClose(object sender, TabCloseEventArgs e)
+        public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var returnedObject = e.TabObject as Product;
+            if (!IsBeenNavigated)
+            {
+                RefreshSource();
+                if (ProductCollection.Count > 0)
+                {
+                    SelectedProduct = ProductCollection[0];
+                }
+
+                IsBeenNavigated = true;
+            }
+        }
+
+        private void OnCloseTab(object obj)
+        {
+            var returnedObject = obj as Product;
 
             if (returnedObject == null)
             {

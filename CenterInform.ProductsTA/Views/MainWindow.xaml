@@ -75,6 +75,7 @@
                 CommandParameter="ProductAddEditView">Open</Button>
         </StackPanel>
         <TabControl Grid.Row="1"
+                    Name="TabControl"
                     prism:RegionManager.RegionName="{x:Static core:RegionNames.TabRegion}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch">
