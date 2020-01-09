@@ -37,10 +37,16 @@ namespace CenterInform.ProductsTA.ViewModels
 
         public DelegateCommand<object> CloseCommand { get; }
 
-        void CloseCommandExecute(object tabItem)
+        private void CloseCommandExecute(object tabItem)
         {
-            CurrentRegionManager.Regions[RegionNames.TabRegion].Remove(tabItem);
+            if (CanClose)
+            {
+                CurrentRegionManager.Regions[RegionNames.TabRegion].Remove(tabItem);
+                OnCloseCommandExecute();
+            }
         }
+
+        protected virtual void OnCloseCommandExecute() { }
 
         public IRegionManager CurrentRegionManager { get; protected set; }
 
@@ -50,7 +56,7 @@ namespace CenterInform.ProductsTA.ViewModels
 
         public virtual bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            return false;
+            return true;
         }
 
         public virtual void OnNavigatedTo(NavigationContext navigationContext)

@@ -120,9 +120,9 @@ namespace CenterInform.ProductsTA.Models
                         }
                     case "Quantity":
                         {
-                            if (Quantity < 0)
+                            if (Quantity <= 0)
                             {
-                                error = "Значение не должно быть меньше 0";
+                                error = "Значение не должно быть меньше или равно 0";
                             }
                             break;
                         }

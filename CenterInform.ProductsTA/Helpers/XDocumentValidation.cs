@@ -28,7 +28,7 @@ namespace CenterInform.ProductsTA.Helpers
             }
             catch
             {
-                return "Ошибка чтения файлов!";
+                return "Ошибка чтения файла!";
             }
         }
     }

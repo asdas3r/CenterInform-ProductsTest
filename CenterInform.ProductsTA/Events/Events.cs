@@ -8,4 +8,6 @@ using System.Threading.Tasks;
 namespace CenterInform.ProductsTA.Events
 {
     public class CloseTabEvent : PubSubEvent<object> { }
+
+    public class ObjectChangedEvent : PubSubEvent<object>  { }
 }

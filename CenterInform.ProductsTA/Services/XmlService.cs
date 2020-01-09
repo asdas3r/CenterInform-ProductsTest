@@ -14,7 +14,7 @@ namespace CenterInform.ProductsTA.Services
         {
             XDocument doc = XDocument.Load(XmlReader.Create(filePath));
 
-            ErrorString = XDocumentValidation.Validate(doc, "CenterInform.ProductsTestAssignment.Resources.ProductsSchema.xsd");
+            ErrorString = XDocumentValidation.Validate(doc, "CenterInform.ProductsTA.Resources.ProductsSchema.xsd");
 
             if (!string.IsNullOrEmpty(ErrorString))
             {

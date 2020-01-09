@@ -139,6 +139,7 @@
     <Compile Include="Interfaces\IFileIOService.cs" />
     <Compile Include="Interfaces\IFileService.cs" />
     <Compile Include="Interfaces\IDialogWindowService.cs" />
+    <Compile Include="Interfaces\IObjectUsageControlService.cs" />
     <Compile Include="MainModule.cs" />
     <Compile Include="Migrations\201911190618083_InitialCreate.cs" />
     <Compile Include="Migrations\201911190618083_InitialCreate.designer.cs">
@@ -151,6 +152,7 @@
     <Compile Include="Services\FileDialogService.cs" />
     <Compile Include="Services\DialogWindowService.cs" />
     <Compile Include="Services\FileIOService.cs" />
+    <Compile Include="Services\ProductUsageControlService.cs" />
     <Compile Include="Services\XmlService.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\CustomMessageBoxViewModel.cs" />

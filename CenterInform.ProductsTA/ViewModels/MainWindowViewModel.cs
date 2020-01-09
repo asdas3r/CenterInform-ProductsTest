@@ -11,11 +11,10 @@ namespace CenterInform.ProductsTA.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
-        private readonly IUnityContainer _container;
         private readonly IRegionManager _regionManager;
         public DelegateCommand<string> Nabigate { get; set; }
 
-        public MainWindowViewModel(IRegionManager regionManager, IUnityContainer container)
+        public MainWindowViewModel(IRegionManager regionManager)
         {
             _regionManager = regionManager;
             Nabigate = new DelegateCommand<string>(Navigate);

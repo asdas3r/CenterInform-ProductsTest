@@ -23,11 +23,12 @@ namespace CenterInform.ProductsTA.ViewModels
         private readonly IFileDialogService _fileDialog;
         private readonly IFileService _xmlService;
         private readonly IEventAggregator _eventAggregator;
+        private readonly IObjectUsageControlService<Product> _usageControlService;
 
         private ObservableCollection<Product> _products = new ObservableCollection<Product>();
         public ReadOnlyObservableCollection<Product> ProductCollection { get; }
 
-        public ProductViewModel(IRegionManager regionManager, IDialogWindowService dialogService, IFileIOService fileIOService, IFileDialogService fileDialog, IFileService fileService, IEventAggregator eventAggregator)
+        public ProductViewModel(IRegionManager regionManager, IDialogWindowService dialogService, IFileIOService fileIOService, IFileDialogService fileDialog, IFileService fileService, IEventAggregator eventAggregator, IObjectUsageControlService<Product> usageControlService)
         {
             Title = "Список товаров";
             ProductCollection = new ReadOnlyObservableCollection<Product>(_products);
@@ -39,12 +40,13 @@ namespace CenterInform.ProductsTA.ViewModels
             _fileDialog = fileDialog;
             _xmlService = fileService;
             _eventAggregator = eventAggregator;
+            _usageControlService = usageControlService;
 
             SelectPreviousProductCommand = new DelegateCommand(SelectPreviousProductCommandExecute);
             SelectNextProductCommand = new DelegateCommand(SelectNextProductCommandExecute);
             CreateProductCommand = new DelegateCommand(CreateProductCommandExecute);
-            EditProductCommand = new DelegateCommand(EditProductCommandExecute, EditProductCommandCanExecute).ObservesProperty(() => ProductCollection.Count);
-            RemoveProductCommand = new DelegateCommand(RemoveProductCommandExecute, RemoveProductCommandCanExecute).ObservesProperty(() => ProductCollection.Count);
+            EditProductCommand = new DelegateCommand(EditProductCommandExecute, EditProductCommandCanExecute).ObservesProperty(() => SelectedProduct);
+            RemoveProductCommand = new DelegateCommand(RemoveProductCommandExecute, RemoveProductCommandCanExecute).ObservesProperty(() => SelectedProduct);
             ImportXmlCommand = new DelegateCommand(ImportXmlCommandExecute);
             ExportXmlCommand = new DelegateCommand(ExportXmlCommandExecute);
 
@@ -97,6 +99,8 @@ namespace CenterInform.ProductsTA.ViewModels
             parameters.Add("selectedProduct", SelectedProduct);
             CurrentRegionManager.Regions[RegionNames.TabRegion].RequestNavigate("ProductAddEditView", parameters);
 
+            _usageControlService.SetUsed(SelectedProduct);
+
             RemoveProductCommand.RaiseCanExecuteChanged();
         }
 
@@ -133,37 +137,16 @@ namespace CenterInform.ProductsTA.ViewModels
 
         private bool RemoveProductCommandCanExecute()
         {
-            if (ProductCollection.Count > 0 )
-            {
-                return true;
-            }
-            return false;
+            return ProductCollection.Count > 0 && !_usageControlService.CheckIfUsed(SelectedProduct);
         }
 
         private void ImportXmlCommandExecute()
         {
-            FileDialogService dialog = _fileDialog as FileDialogService;
-            XmlService xml = _xmlService as XmlService;
-
-            var products = _fileIOService.Import<Products>(dialog, xml);
+            var products = _fileIOService.Import<Products>(_fileDialog, _xmlService);
             if (products != null)
             {
                 ImportListWithChoices(products.productsList);
             }
-        }
-
-        private void ExportXmlCommandExecute()
-        {
-            FileDialogService dialog = _fileDialog as FileDialogService;
-            XmlService xml = _xmlService as XmlService;
-            Products products = null;
-
-            if (ProductCollection.Count != 0)
-            {
-                products = new Products(ProductCollection.ToList());
-            }
-
-            _fileIOService.Export(dialog, xml, products);
         }
 
         private void ImportListWithChoices(List<Product> productsList)
@@ -204,6 +187,7 @@ namespace CenterInform.ProductsTA.ViewModels
                         dbService.ModifyInDb(dbService.FindValueSameId(p), p);
                         RefreshSource();
                         SelectedProduct = ProductCollection.First(x => x.Code.Equals(p.Code));
+                        _eventAggregator.GetEvent<ObjectChangedEvent>().Publish(p);
                     }
 
                     amount--;
@@ -215,6 +199,20 @@ namespace CenterInform.ProductsTA.ViewModels
                     SelectedProduct = ProductCollection.First(x => x.Code.Equals(p.Code));
                 }
             }
+        }
+
+        private void ExportXmlCommandExecute()
+        {
+            FileDialogService dialog = _fileDialog as FileDialogService;
+            XmlService xml = _xmlService as XmlService;
+            Products products = null;
+
+            if (ProductCollection.Count != 0)
+            {
+                products = new Products(ProductCollection.ToList());
+            }
+
+            _fileIOService.Export(dialog, xml, products);
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -229,6 +227,8 @@ namespace CenterInform.ProductsTA.ViewModels
 
                 IsBeenNavigated = true;
             }
+
+            RemoveProductCommand.RaiseCanExecuteChanged();
         }
 
         private void OnCloseTab(object obj)
@@ -266,6 +266,9 @@ namespace CenterInform.ProductsTA.ViewModels
             {
                 _products.Add(p);
             }
+
+            EditProductCommand.RaiseCanExecuteChanged();
+            RemoveProductCommand.RaiseCanExecuteChanged();
         }
     }
 }

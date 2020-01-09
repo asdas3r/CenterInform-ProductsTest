@@ -1,32 +1,50 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 using Prism.Regions;
 using Prism.Commands;
+using Prism.Events;
 
 using CenterInform.ProductsTA.Models;
 using CenterInform.ProductsTA.Services;
 using CenterInform.ProductsTA.Interfaces;
-using System;
+using CenterInform.ProductsTA.Events;
+using CenterInform.ProductsTA.Core;
+using System.Linq;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
     public class ProductAddEditViewModel : TabViewModel
     {
+        private Product initProduct;
         private Product formProduct;
         private readonly IDialogWindowService _dialogService;
+        private readonly IEventAggregator _eventAggregator;
+        private readonly IObjectUsageControlService<Product> _usageControlService;
 
-        public ProductAddEditViewModel(IRegionManager regionManager, IDialogWindowService dialogService) 
+        public ProductAddEditViewModel(IRegionManager regionManager, IDialogWindowService dialogService, IEventAggregator eventAggregator, IObjectUsageControlService<Product> usageControlService) 
         {
             CurrentRegionManager = regionManager;
             _dialogService = dialogService;
-            CancelCommand = CloseCommand;
+            _eventAggregator = eventAggregator;
+            _usageControlService = usageControlService;
+
+            CancelCommand = new DelegateCommand(CancelCommandExecute);
             SaveCommand = new DelegateCommand(SaveCommandExecute, SaveCommandCanExecute);
+
+            _eventAggregator.GetEvent<ObjectChangedEvent>().Subscribe(OnProductChanged);
         }
 
-        public DelegateCommand<object> CancelCommand { get; }
+        public DelegateCommand CancelCommand { get; }
         public DelegateCommand SaveCommand { get; }
-        public string WindowLabel { get; set; }
         public bool IsIdReadOnly { get; set; }
+
+        private string _windowLabel;
+        public string WindowLabel
+        {
+            get { return _windowLabel; }
+            set { SetProperty(ref _windowLabel, value); }
+        }
 
         public Product FormProduct
         {
@@ -65,46 +83,69 @@ namespace CenterInform.ProductsTA.ViewModels
                 IsIdReadOnly = true;
             }
 
+            initProduct = FormProduct;
+
             TitleAppend = FormProduct.Code;
         }
 
         private void SaveCommandExecute()
         {
             DbService dbService = new DbService();
-            if (CurrentServiceObject == null)
+            if (initProduct == null)
             {
-                CurrentServiceObject = FormProduct;
                 if (dbService.FindValueSameId(FormProduct) != null)
                 {
                     if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct), 1)) == true)
                     {
                         dbService.ModifyInDb(dbService.FindValueSameId(FormProduct), FormProduct);
+                        CloseUponSave(FormProduct);
                     }
                 }
                 else
                 {
                     dbService.AddToDb(FormProduct);
+                    CloseUponSave(FormProduct);
                 }
             }
             else
             {
-                if (dbService.FindValueSameId(FormProduct) != null && !FormProduct.Code.Equals(((Product)CurrentServiceObject).Code))
+                if (dbService.FindValueSameId(FormProduct) != null && !FormProduct.Code.Equals(initProduct.Code))
                 {
                     if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct), 1)) == true)
                     {
-                        if (dbService.DeleteFromDb((Product)CurrentServiceObject))
+                        if (dbService.DeleteFromDb(initProduct))
                         {
                             dbService.ModifyInDb(dbService.FindValueSameId(FormProduct), FormProduct);
+                            CloseUponSave(FormProduct);
                         }
                     }
                 }
                 else
                 {
-                    dbService.ModifyInDb((Product)CurrentServiceObject, FormProduct);
+                    dbService.ModifyInDb(initProduct, FormProduct);
+                    CloseUponSave(FormProduct);
                 }
             }
+        }
 
+        private void CloseUponSave(Product product)
+        {
+            var tabItem = CurrentRegionManager.Regions[RegionNames.TabRegion].ActiveViews.FirstOrDefault();
+            CloseCommand.Execute(tabItem);
 
+            _eventAggregator.GetEvent<CloseTabEvent>().Publish(FormProduct);
+        }
+
+        private void CancelCommandExecute()
+        {
+            var tabItem = CurrentRegionManager.Regions[RegionNames.TabRegion].ActiveViews.FirstOrDefault();
+            CloseCommand.Execute(tabItem);
+        }
+
+        protected override void OnCloseCommandExecute()
+        {
+            _usageControlService.UnsetUsed(initProduct);
+            CurrentRegionManager.Regions[RegionNames.TabRegion].RequestNavigate("ProductView");
         }
 
         private bool SaveCommandCanExecute()
@@ -124,29 +165,50 @@ namespace CenterInform.ProductsTA.ViewModels
             SaveCommand.RaiseCanExecuteChanged();
         }
 
+        private void OnProductChanged(object obj)
+        {
+            if (obj == null)
+                return;
+
+            Product product = obj as Product;
+            if (product == null)
+                return;
+
+            if (product.Code.Equals(initProduct.Code))
+            {
+                FormProduct = new Product(product.Code, product.Name, product.Description, product.Quantity);
+                initProduct = FormProduct;
+            }
+        }
+
         public override bool IsNavigationTarget(NavigationContext navigationContext)
         {
-            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
+            Product recievedProduct = navigationContext.Parameters["selectedProduct"] as Product;
 
             if (formProduct == null)
             {
-                return true;
+                return false;
             }
 
             if (recievedProduct == null)
-                return true;
-
-            if (recievedProduct.Code.Equals(formProduct.Code))
                 return false;
 
-            return true;
+            if (recievedProduct.Code.Equals(formProduct.Code))
+                return true;
+
+            return false;
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            Product recievedProduct = navigationContext.Parameters["serviceObject"] as Product;
+            if (!IsBeenNavigated)
+            {
+                Product recievedProduct = navigationContext.Parameters["selectedProduct"] as Product;
 
-            InitProductForm(recievedProduct);
+                InitProductForm(recievedProduct);
+
+                IsBeenNavigated = true;
+            }
         }
     }
 }

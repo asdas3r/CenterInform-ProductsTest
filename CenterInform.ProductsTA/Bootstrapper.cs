@@ -9,6 +9,7 @@ using CenterInform.ProductsTA.Views;
 using CenterInform.ProductsTA.ViewModels;
 using CenterInform.ProductsTA.Interfaces;
 using CenterInform.ProductsTA.Services;
+using CenterInform.ProductsTA.Models;
 
 namespace CenterInform.ProductsTA
 {
@@ -34,12 +35,14 @@ namespace CenterInform.ProductsTA
         {
             base.ConfigureContainer();
             ViewModelLocationProvider.SetDefaultViewModelFactory((type) => Container.Resolve(type));
-            
-            Container.RegisterType<ITabService, TabService>(new ContainerControlledLifetimeManager());
+
+            Container.RegisterType<object, ProductView>("ProductView");
+
             Container.RegisterType<IDialogWindowService, DialogWindowService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<IFileIOService, FileIOService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<IFileDialogService, FileDialogService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<IFileService, XmlService>(new ContainerControlledLifetimeManager());
+            Container.RegisterType<IObjectUsageControlService<Product>, ProductUsageControlService>(new ContainerControlledLifetimeManager());
         }
     }
 }
