@@ -2,18 +2,18 @@
 
 namespace CenterInform.ProductsTA.Models
 {
-    class ProductDBContext : DbContext
+    class ProductDbContext : DbContext
     {
-        public ProductDBContext() : base("DBConnection")
+        public ProductDbContext() : base("DBConnection")
         {
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ProductDBContext, Migrations.Configuration>());
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ProductDbContext, Migrations.Configuration>());
         }
 
         public DbSet<Product> Products { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ProductDBContext, Migrations.Configuration>());
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ProductDbContext, Migrations.Configuration>());
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using System.Linq;
 
 using Prism.Regions;
 using Prism.Commands;
@@ -10,7 +10,6 @@ using CenterInform.ProductsTA.Services;
 using CenterInform.ProductsTA.Interfaces;
 using CenterInform.ProductsTA.Events;
 using CenterInform.ProductsTA.Core;
-using System.Linq;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
@@ -18,6 +17,7 @@ namespace CenterInform.ProductsTA.ViewModels
     {
         private Product initProduct;
         private Product formProduct;
+        private Product sentProduct;
         private readonly IDialogWindowService _dialogService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IObjectUsageControlService<Product> _usageControlService;
@@ -37,7 +37,14 @@ namespace CenterInform.ProductsTA.ViewModels
 
         public DelegateCommand CancelCommand { get; }
         public DelegateCommand SaveCommand { get; }
-        public bool IsIdReadOnly { get; set; }
+
+        private bool _isIdReadOnly = false;
+
+        public bool IsIdReadOnly
+        {
+            get { return _isIdReadOnly; }
+            set { SetProperty(ref _isIdReadOnly, value); }
+        }
 
         private string _windowLabel;
         public string WindowLabel
@@ -80,10 +87,9 @@ namespace CenterInform.ProductsTA.ViewModels
                 Title = "Редактирование";
                 WindowLabel = "Редактирование выбранной продукции";
                 FormProduct = new Product(product.Code, product.Name, product.Description, product.Quantity);
+                initProduct = new Product(product.Code, product.Name, product.Description, product.Quantity);
                 IsIdReadOnly = true;
             }
-
-            initProduct = FormProduct;
 
             TitleAppend = FormProduct.Code;
         }
@@ -95,7 +101,7 @@ namespace CenterInform.ProductsTA.ViewModels
             {
                 if (dbService.FindValueSameId(FormProduct) != null)
                 {
-                    if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct), 1)) == true)
+                    if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct))) == true)
                     {
                         dbService.ModifyInDb(dbService.FindValueSameId(FormProduct), FormProduct);
                         CloseUponSave(FormProduct);
@@ -111,7 +117,7 @@ namespace CenterInform.ProductsTA.ViewModels
             {
                 if (dbService.FindValueSameId(FormProduct) != null && !FormProduct.Code.Equals(initProduct.Code))
                 {
-                    if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct), 1)) == true)
+                    if (_dialogService.ShowDialog("Повторяющееся значение", new RecurrentEntryDialogViewModel(FormProduct, dbService.FindValueSameId(FormProduct))) == true)
                     {
                         if (dbService.DeleteFromDb(initProduct))
                         {
@@ -133,7 +139,7 @@ namespace CenterInform.ProductsTA.ViewModels
             var tabItem = CurrentRegionManager.Regions[RegionNames.TabRegion].ActiveViews.FirstOrDefault();
             CloseCommand.Execute(tabItem);
 
-            _eventAggregator.GetEvent<CloseTabEvent>().Publish(FormProduct);
+            sentProduct = FormProduct;
         }
 
         private void CancelCommandExecute()
@@ -142,10 +148,10 @@ namespace CenterInform.ProductsTA.ViewModels
             CloseCommand.Execute(tabItem);
         }
 
-        protected override void OnCloseCommandExecute()
+        protected override void OnCloseCommandExecute(object serviceObject)
         {
+            _eventAggregator.GetEvent<CloseTabEvent>().Publish(sentProduct);
             _usageControlService.UnsetUsed(initProduct);
-            CurrentRegionManager.Regions[RegionNames.TabRegion].RequestNavigate("ProductView");
         }
 
         private bool SaveCommandCanExecute()
@@ -176,8 +182,7 @@ namespace CenterInform.ProductsTA.ViewModels
 
             if (product.Code.Equals(initProduct.Code))
             {
-                FormProduct = new Product(product.Code, product.Name, product.Description, product.Quantity);
-                initProduct = FormProduct;
+                InitProductForm(product); 
             }
         }
 

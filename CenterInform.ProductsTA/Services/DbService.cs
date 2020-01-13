@@ -10,7 +10,7 @@ namespace CenterInform.ProductsTA.Services
     {
         public void AddToDb(Product product)
         {
-            using (var db = new ProductDBContext())
+            using (var db = new ProductDbContext())
             {
                 if (product != null)
                 {
@@ -27,7 +27,7 @@ namespace CenterInform.ProductsTA.Services
         {
             get
             {
-                using (var db = new ProductDBContext())
+                using (var db = new ProductDbContext())
                 {
                     return db.Products.ToList();
                 }
@@ -36,7 +36,7 @@ namespace CenterInform.ProductsTA.Services
 
         public bool DeleteFromDb(Product product)
         {
-            using (var db = new ProductDBContext())
+            using (var db = new ProductDbContext())
             {
                 if (product != null)
                 {
@@ -53,7 +53,7 @@ namespace CenterInform.ProductsTA.Services
 
         public void ModifyInDb(Product sourceProduct, Product destProduct)
         {
-            using (var db = new ProductDBContext())
+            using (var db = new ProductDbContext())
             {
                 if (sourceProduct != null && destProduct != null && (!db.Products.Any(p => p.Code.Equals(destProduct.Code)) | destProduct.Code.Equals(sourceProduct.Code) == true))
                 {
@@ -71,7 +71,7 @@ namespace CenterInform.ProductsTA.Services
 
         public Product FindValueSameId(Product product)
         {
-            using (var db = new ProductDBContext())
+            using (var db = new ProductDbContext())
             {
                 Product p = null;
                 p = db.Products.Find(product.Code);
@@ -81,7 +81,7 @@ namespace CenterInform.ProductsTA.Services
 
         public ObservableCollection<Product> GetProducts()
         {
-            using (var db = new ProductDBContext())
+            using (var db = new ProductDbContext())
             {
                 var t = new ObservableCollection<Product>(db.Products.ToList());
                 return t;

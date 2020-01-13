@@ -1,10 +1,6 @@
-﻿using System;
-using System.Windows;
-
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Regions;
 
-using CenterInform.ProductsTA.Interfaces;
 using CenterInform.ProductsTA.Core;
 
 namespace CenterInform.ProductsTA.ViewModels
@@ -39,14 +35,16 @@ namespace CenterInform.ProductsTA.ViewModels
 
         private void CloseCommandExecute(object tabItem)
         {
-            if (CanClose)
-            {
-                CurrentRegionManager.Regions[RegionNames.TabRegion].Remove(tabItem);
-                OnCloseCommandExecute();
-            }
+            if (!CanClose)
+                return;
+            CurrentRegionManager.Regions[RegionNames.TabRegion].Remove(tabItem);
+            OnCloseCommandExecute();
         }
 
-        protected virtual void OnCloseCommandExecute() { }
+        protected virtual void OnCloseCommandExecute(object serviceObject = null)
+        {
+
+        }
 
         public IRegionManager CurrentRegionManager { get; protected set; }
 

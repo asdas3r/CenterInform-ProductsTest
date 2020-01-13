@@ -11,7 +11,7 @@ namespace CenterInform.ProductsTA.ViewModels
     class RecurrentEntryDialogViewModel : BaseViewModel, IDialogCloseRequested
     {
         private bool repeatForEach = false;
-        public RecurrentEntryDialogViewModel(Product toAdd, Product toSubstitute, int amountLeft)
+        public RecurrentEntryDialogViewModel(Product toAdd, Product toSubstitute, int amountLeft = 1)
         {
             ReccurentProduct = toAdd;
             ExistingProduct = toSubstitute;

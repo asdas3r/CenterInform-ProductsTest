@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 
 using Prism.Commands;
 using Prism.Regions;
@@ -12,7 +11,6 @@ using CenterInform.ProductsTA.Models;
 using CenterInform.ProductsTA.Services;
 using CenterInform.ProductsTA.Core;
 using CenterInform.ProductsTA.Events;
-using System;
 
 namespace CenterInform.ProductsTA.ViewModels
 {
@@ -237,6 +235,7 @@ namespace CenterInform.ProductsTA.ViewModels
 
             if (returnedObject == null)
             {
+                RemoveProductCommand.RaiseCanExecuteChanged();
                 return;
             }
 

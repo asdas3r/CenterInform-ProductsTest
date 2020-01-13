@@ -146,7 +146,7 @@
       <DependentUpon>201911190618083_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\ProductDBContext.cs" />
+    <Compile Include="Models\ProductDbContext.cs" />
     <Compile Include="Interfaces\IFileDialogService.cs" />
     <Compile Include="Services\DbService.cs" />
     <Compile Include="Services\FileDialogService.cs" />
